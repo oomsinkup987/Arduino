@@ -1,0 +1,48 @@
+#include "DHT.h"
+#include <SPI.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+#define OLED_RESET 4
+Adafruit_SSD1306 display(OLED_RESET);
+DHT dht;
+void setup() {
+  dht.setup(2);
+  delay(500);
+  Serial.begin(9600);
+  Serial.println();
+  Serial.println("Status\tHumidity (%)\tTemperature (C)\t(F)");
+
+  dht.setup(2); // data pin 2
+}
+void loop() 
+   {
+  float humidity = dht.getHumidity(); // ดึงค่าความชื้น
+  float temperature = dht.getTemperature(); // ดึงค่าอุณหภูมิ
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3c); //สั่งให้จอ OLED เริ่มทำงานที่ Address 0x3C
+  display.clearDisplay(); // ลบภาพในหน้าจอทั้งหมด
+  display.drawPixel(127, 63, WHITE);
+  display.drawLine(0, 63, 127, 21, WHITE);
+  display.drawCircle(110, 50, 12, WHITE);
+  display.fillCircle(45, 50, 8, WHITE);
+  display.drawTriangle(70, 60, 90, 60, 80, 46, WHITE);
+  display.setTextSize(1); // กำหนดขนาดตัวอักษร
+  display.setTextColor(WHITE);
+  display.setCursor(0,0); // กำหนดตำแหน่ง x,y ที่จะแสดงผล
+  display.println(" Temperature ");
+  display.setTextSize(2);
+  display.println(temperature, 1);
+  display.setTextColor(BLACK, WHITE); //กำหนดข้อความสีขาว ฉากหลังสีดำ
+  display.setTextSize(1);
+  display.println(humidity, 1);
+  display.display();
+  delay(dht.getMinimumSamplingPeriod());
+  Serial.print(dht.getStatusString());
+  Serial.print("\t");
+  Serial.print(humidity, 1);
+  Serial.print("\t\t");
+  Serial.print(temperature, 1);
+  Serial.print("\t\t");
+  Serial.println(dht.toFahrenheit(temperature), 1);
+  delay(5000);
+}
